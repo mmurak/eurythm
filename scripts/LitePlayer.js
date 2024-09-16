@@ -93,6 +93,8 @@ class GlobalManager {
 		this.timer;
 		this.timerObj = null;
 
+		this.speedStorage = 1;
+
 		this.sectionStart = 0;
 		this.sectionEnd = 0;
 		this.playStartMark = 0;
@@ -177,10 +179,14 @@ G.defaultSpeed.addEventListener("click", resetPlaySpeed);
 // Change play speed
 G.speedVal.addEventListener("input", _changePlaySpeed);
 function _changePlaySpeed() {
-	G.speedDigits.innerHTML = Number(G.speedVal.value).toFixed(2);
+	const sp = Number(G.speedVal.value).toFixed(2);
+	G.speedDigits.innerHTML = sp;
+	if (sp != 1) {
+		G.speedStorage = sp;
+		G.defaultSpeed.value = "1x Speed";
+	}
 	G.wavePlayer.setPlaybackRate(G.speedVal.value, true);
 }
-
 G.speedVal.addEventListener("focus", () => { G.speedVal.blur(); });
 
 G.jumpSelector.addEventListener("change", (evt) => {
@@ -317,7 +323,13 @@ function playPauseControl() {
 }
 
 function resetPlaySpeed() {
-	G.speedVal.value = 1.0;
+	if (G.speedVal.value == 1.0) {
+		G.speedVal.value = G.speedStorage;
+		G.defaultSpeed.value = "1x Speed";
+	} else {
+		G.speedVal.value = 1.0;
+		G.defaultSpeed.value = G.speedStorage + "x Speed";
+	}
 	G.speedVal.dispatchEvent(new Event("input"));
 }
 
