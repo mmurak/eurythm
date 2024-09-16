@@ -1,0 +1,44 @@
+html{
+	background-color: azure;
+	height: 100%;
+}
+body{
+	height: 100%;
+	margin: 0;
+	padding: 5;
+}
+#PlayPause{
+	width: 80%;
+	height: 60px;
+	background-color: #000088;
+	font-size: 18pt;
+	color: white;
+}
+#PlayPause:disabled{
+	color: lightgrey;
+	background-color: #4682b4;
+}
+#SpeedVal{
+	width: 50%;
+}
+.OpButton{
+	height: 30px;
+	width: 15%;
+	text-align: center;
+}
+.MarkButton{
+	height: 30px;
+	width: 120px;
+}
+header{
+	padding: 0 5px 0 0;
+	text-align: right;
+	font-size: 110%;
+	font-style: italic;
+}
+footer{
+	text-align: right;
+	position: sticky;
+	top: 100vh;
+	width: 100%;
+}
