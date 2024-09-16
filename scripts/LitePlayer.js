@@ -94,6 +94,7 @@ class GlobalManager {
 		this.timerObj = null;
 
 		this.speedStorage = 1;
+		this.defaultSpeedLabel = "1x Speed";
 
 		this.sectionStart = 0;
 		this.sectionEnd = 0;
@@ -183,7 +184,7 @@ function _changePlaySpeed() {
 	G.speedDigits.innerHTML = sp;
 	if (sp != 1) {
 		G.speedStorage = sp;
-		G.defaultSpeed.value = "1x Speed";
+		G.defaultSpeed.value = G.defaultSpeedLabel;
 	}
 	G.wavePlayer.setPlaybackRate(G.speedVal.value, true);
 }
@@ -277,8 +278,10 @@ function readyCB() {
 	G.wavePlayer.zoom(G.currentZoomFactor);
 
 	G.speedVal.value = 1.0;
+	G.defaultSpeed.value = G.defaultSpeedLabel;
 	G.speedDigits.innerHTML = Number(G.speedVal.value).toFixed(2);
 	G.totalDuration.innerHTML = convertTimeRep(G.wavePlayer.getDuration());
+	G.speedStorage = 1;
 
 	G.timeMarkerManager.eraseAllData(G.abTable);
 }
@@ -325,7 +328,7 @@ function playPauseControl() {
 function resetPlaySpeed() {
 	if (G.speedVal.value == 1.0) {
 		G.speedVal.value = G.speedStorage;
-		G.defaultSpeed.value = "1x Speed";
+		G.defaultSpeed.value = G.defaultSpeedLabel;
 	} else {
 		G.speedVal.value = 1.0;
 		G.defaultSpeed.value = G.speedStorage + "x Speed";
