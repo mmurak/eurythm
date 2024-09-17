@@ -270,6 +270,7 @@ function readyCB() {
 		"MarkB",
 	]);
 	G.zoomIn.disabled = false;
+	G.zoomOut.disabled = true;
 
 	G.currentZoomFactor = Math.trunc(window.innerWidth / G.wavePlayer.getDuration());
 	G.minimumZoomFactor = G.currentZoomFactor;
