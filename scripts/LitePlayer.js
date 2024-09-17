@@ -197,7 +197,8 @@ G.jumpSelector.addEventListener("change", (evt) => {
 G.leftArrowButton.addEventListener("click", leftButtonClick);
 G.rightArrowButton.addEventListener("click", rightButtonClick);
 
-G.zoomIn.addEventListener("click", (evt) => {
+G.zoomIn.addEventListener("click", (evt) => { processZoomIn(evt); });
+function processZoomIn(evt) {
 	G.zoomOut.disabled = false;
 	if (evt.shiftKey) {
 		G.currentZoomFactor = G.storedZoomFactor;
@@ -206,9 +207,10 @@ G.zoomIn.addEventListener("click", (evt) => {
 		G.storedZoomFactor = G.currentZoomFactor;
 	}
 	G.wavePlayer.zoom(G.currentZoomFactor);
-});
+}
 
-G.zoomOut.addEventListener("click", (evt) => {
+G.zoomOut.addEventListener("click", (evt) => { processZoomOut(evt); });
+function processZoomOut(evt) {
 	if (G.currentZoomFactor > G.minimumZoomFactor) {
 		if (evt.shiftKey) {
 			G.storedZoomFactor = G.currentZoomFactor;
@@ -221,7 +223,7 @@ G.zoomOut.addEventListener("click", (evt) => {
 			G.zoomOut.disabled = true;
 		}
 	}
-});
+}
 
 G.markA.addEventListener("click", markSectionStart);
 
@@ -251,6 +253,10 @@ document.addEventListener("keydown", (evt) => {
 		markSectionEnd();
 	} else if ((evt.key == "d") || (evt.key == "D")) {
 		resetPlaySpeed();
+	} else if ((evt.key == "i") || (evt.key == "I")) {
+		processZoomIn(evt);
+	} else if ((evt.key == "o") || (evt.key == "O")) {
+		processZoomOut(evt);
 	}
 });
 
