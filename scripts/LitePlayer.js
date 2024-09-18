@@ -279,6 +279,8 @@ function readyCB() {
 	G.zoomOut.disabled = true;
 
 	G.currentZoomFactor = Math.trunc(window.innerWidth / G.wavePlayer.getDuration());
+	if (G.currentZoomFactor < 1)
+		G.currentZoomFactor = 1;
 	G.minimumZoomFactor = G.currentZoomFactor;
 	G.zoomDelta = G.currentZoomFactor;
 	G.storedZoomFactor = G.currentZoomFactor;
