@@ -235,7 +235,6 @@ document.addEventListener("keydown", (evt) => {
 	if (G.playPause.disabled)  return;
 	if (evt.key == " ") {
 		playPauseControl();
-		evt.preventDefault();
 	} else if (evt.key == "ArrowLeft") {
 		leftButtonClick();
 	} else if (evt.key == "ArrowRight") {
@@ -260,7 +259,9 @@ document.addEventListener("keydown", (evt) => {
 	} else if ((evt.key == "o") || (evt.key == "O")) {
 		processZoomOut(evt);
 	}
+	evt.stopPropagation();
 	evt.preventDefault();
+	return false;
 });
 
 
