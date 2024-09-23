@@ -207,7 +207,6 @@ function processZoomIn(evt) {
 		G.storedZoomFactor = G.currentZoomFactor;
 	}
 	G.wavePlayer.zoom(G.currentZoomFactor);
-	evt.preventDefault();
 }
 
 G.zoomOut.addEventListener("click", (evt) => { processZoomOut(evt); });
@@ -224,7 +223,6 @@ function processZoomOut(evt) {
 			G.zoomOut.disabled = true;
 		}
 	}
-	evt.preventDefault();
 }
 
 G.markA.addEventListener("click", markSectionStart);
@@ -260,7 +258,6 @@ document.addEventListener("keydown", (evt) => {
 	} else if ((evt.key == "o") || (evt.key == "O")) {
 		processZoomOut(evt);
 	}
-	evt.preventDefault();
 });
 
 
