@@ -264,6 +264,11 @@ document.addEventListener("keydown", (evt) => {
 	return false;
 });
 
+// Double-click disabler
+document.addEventListener("dblclick", (e) => {
+	e.preventDefault();
+});
+
 
 
 // Callback functions (for fieldEnabler)
