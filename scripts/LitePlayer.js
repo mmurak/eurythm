@@ -1,5 +1,6 @@
 // module
 import WaveSurfer from 'https://cdn.jsdelivr.net/npm/wavesurfer.js@7/dist/wavesurfer.esm.js';
+import TimelinePlugin from 'https://unpkg.com/wavesurfer.js@7.8.6/dist/plugins/timeline.js'
 import { FieldEnabler } from "./FieldEnabler.js";
 
 class TimeMarkerManager {
@@ -138,6 +139,9 @@ G.inputFile.addEventListener("change", (e) => {
 			progressColor: '#87CEBB',
 			height: 250,
 		});
+		G.wavePlayer.registerPlugin(TimelinePlugin.create({
+			secondaryLabelOpacity: 1,
+		}));
 		G.wavePlayer.on("ready", () => {
 			readyCB();
 		});
