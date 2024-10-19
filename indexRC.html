@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Eurythm ver. 1.20</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="shortcut icon" href="kiwi-bird.png">
+		<link rel="stylesheet" href="./LitePlayerRC.css">
+	</head>
+	<body>
+		<header>
+			<a href="./docs/help.html" target="_blank">Eurythm</a> ver. 1.20
+		</header>
+		<div style="display: flex; flex-direction: column; width: 100%; height: calc(100vh - 30px);">
+			<div style="padding: 5px;">
+				<div style="display: flex;">
+					<input type="file" id="InputFile" accept="audio/*" />
+					<div style="margin-left: auto;">
+						<label id="TimerField">00:00.00</label>
+						<label>/</label>
+						<label id="TotalDuration">00:00.00</label>
+					</div>
+					<div style="margin-left: auto;">
+						<input type="button" id="ZoomIn" value="Zoom In" disabled />
+						<input type="button" id="ZoomOut" value="Zoom Out" disabled />
+					</div>
+				</div>
+				<div id="waveform"></div>
+				<br>
+				<input type="button" value="Play" id="PlayPause" />
+				<br><br>
+				<label for="SpeedVal" id="SpeedHeader">Speed: </label>
+				<label for="SpeedVal" id="SpeedDigits">1.00</label>
+				<input type="range" min="0.2" max="2.0" value="1.0" step="0.01" id="SpeedVal" />
+				<input type="button" id="DefaultSpeed" value="1x Speed" />
+				<br><br>
+				<div style="display: flex;">
+					<input type="button" id="LeftArrowButton" class="OpButton" value="&#x25C0;(REW)" />
+					<select id="JumpSelector" class="OpButton">
+						<option value="0.5">0.5 sec.</option>
+						<option value="1.0">1.0 sec.</option>
+						<option value="1.5">1.5 sec.</option>
+						<option value="2.0">2.0 sec.</option>
+						<option value="2.5">2.5 sec.</option>
+						<option value="3.0" selected>3.0 sec.</option>
+						<option value="3.5">3.5 sec.</option>
+						<option value="4.0">4.0 sec.</option>
+						<option value="4.5">4.5 sec.</option>
+						<option value="5.0">5.0 sec.</option>
+					</select>
+					<input type="button" id="RightArrowButton" class="OpButton" value="&#x25B6;(FF)" />
+
+					<div style="margin-left: auto;">
+						<label for="LoopFlag">Loop: </label>
+						<input type="checkbox" id="LoopFlag" checked/>
+						<input type="button" id="MarkA" class="MarkButton" value="A" />
+						<input type="button" id="MarkB" class="MarkButton" value="B" />
+					</div>
+				</div>
+			</div>
+			<div style="flex: 1; overflow-y: auto;">
+				<table id="ABtable">
+				</table>
+			</div>
+			<footer>
+			Powered by <a href="https://wavesurfer.xyz/" target="_blank">wavesurfer.js</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			</footer>
+		</div>
+		<script type="module" src="./scripts/LitePlayerRC.js"></script>
+
+	</body>
+</html>
