@@ -11,6 +11,10 @@ class TimeMarkerManager {
 	addData(sectionStart, sectionEnd, note) {
 		this.dataPool.push([sectionStart, sectionEnd, note]);
 	}
+	modifyData(sectionStart, sectionEnd, node, note) {
+		let idx = Number(node.id.replace("r", "")) - 1;
+		this.dataPool[idx][2] = note;
+	}
 	deleteData(node) {
 		let idx = Number(node.id.replace("r", "")) - 1;
 		this.dataPool.splice(idx, 1);
@@ -47,11 +51,19 @@ class TimeMarkerManager {
 			// Comment cell
 			let cellTwo = newRow.insertCell(4);
 			cellTwo.style = "width: 100em;";
-			let commentText = document.createTextNode(elem[2]);
+			let commentText = document.createElement("span");
+			commentText.innerHTML = escaper(elem[2]);
 			cellTwo.appendChild(commentText);
 
+			// Edit button
+			let editButton = newRow.insertCell(5);
+			let editButtonAnchor = document.createElement("a");
+			editButtonAnchor.addEventListener("click", () => { this.clickCallback("edit", newRow); });
+			editButtonAnchor.innerHTML = "✍️";
+			editButton.appendChild(editButtonAnchor);
+
 			// Waste bin 🗑️
-			let cellWaste = newRow.insertCell(5);
+			let cellWaste = newRow.insertCell(6);
 			let cellWasteAnchor = document.createElement("a");
 			cellWasteAnchor.addEventListener("click", () => { this.clickCallback("del", newRow); });
 			cellWasteAnchor.innerHTML = "🗑️";
@@ -91,6 +103,10 @@ class GlobalManager {
 		this.markB = document.getElementById("MarkB");
 		this.abTable = document.getElementById("ABtable");
 
+		this.descOkButton = document.getElementById("DescOkButton");
+		this.descDialog = document.getElementById("DescDialog");
+		this.descArea = document.getElementById("DescArea");
+
 		this.wavePlayer = null;
 
 		this.currentZoomFactor = 10;
@@ -108,7 +124,11 @@ class GlobalManager {
 		this.playStartMark = 0;
 		this.playEndMark = -1;
 
+		this.fontSize = document.getElementById("FontSize");
+
 		this.timeMarkerManager = new TimeMarkerManager(abControl);
+		this.editMode = false;
+		this.edittingNode = null;
 
 		this.fieldEnabler = new FieldEnabler([
 			"InputFile",
@@ -127,6 +147,8 @@ class GlobalManager {
 	}
 }
 const G = new GlobalManager();
+
+G.abTable.style = "font-size:" + G.fontSize.value + "px";
 
 /*
  * waveSurfer section
@@ -241,8 +263,10 @@ G.markA.addEventListener("click", markSectionStart);
 
 G.markB.addEventListener("click", markSectionEnd);
 
+G.descOkButton.addEventListener("click", () => { processDescOk(); });
+
 document.addEventListener("keydown", (evt) => {
-	if (G.playPause.disabled)  return;
+	if ((G.playPause.disabled) || (G.descDialog.style.display == "block"))  return;
 	if (evt.key == " ") {
 		playPauseControl();
 	} else if (evt.key == "ArrowLeft") {
@@ -269,14 +293,23 @@ document.addEventListener("keydown", (evt) => {
 	} else if ((evt.key == "o") || (evt.key == "O")) {
 		processZoomOut(evt);
 	}
-	evt.stopPropagation();
-	evt.preventDefault();
+//	evt.stopPropagation();
+//	evt.preventDefault();
 	return false;
 });
 
 // Double-click disabler
 document.addEventListener("dblclick", (e) => {
 	e.preventDefault();
+});
+
+G.fontSize.addEventListener("focus", (evt) => {
+	G.fontSize.value = "";
+});
+
+G.fontSize.addEventListener("change", (evt) => {
+	G.abTable.style = "font-size:" + G.fontSize.value + "px";
+	G.fontSize.blur();
 });
 
 
@@ -382,13 +415,24 @@ function markSectionEnd() {
 	if (currentTime <= G.sectionStart)  return;
 	G.markA.value = "A";
 	G.sectionEnd = currentTime;
-	let commentText = prompt("Comment text:");
-	if (commentText == null)  commentText = "";
-	G.timeMarkerManager.addData(G.sectionStart, G.sectionEnd, commentText);
+	G.descArea.value = "";
+	G.editMode = false;
+	G.descDialog.style = "display: block;";
+	G.descArea.focus();
+}
+
+function processDescOk() {
+	if (G.editMode) {
+		G.timeMarkerManager.modifyData(G.sectionStart, G.sectionEnd, G.edittingNode, G.descArea.value);
+	} else {
+		G.timeMarkerManager.addData(G.sectionStart, G.sectionEnd, G.descArea.value);
+	}
 	G.timeMarkerManager.buildTable(G.abTable);
 	if (G.wavePlayer.isPlaying()) {
 		G.timeMarkerManager.buttonDisabler(G.abTable, true);
 	}
+	G.descDialog.style = "display: none;";
+	G.markA.value = "A";
 }
 
 function convertTimeRep(time) {
@@ -414,11 +458,28 @@ function abControl(command, node) {
 	if (command == "del") {
 		G.timeMarkerManager.deleteData(node);
 		G.timeMarkerManager.buildTable(G.abTable);
-		
+	} else if (command == "edit") {
+		G.sectionStart = node.cells[1];
+		G.sectionEnd = node.cells[3];
+		let text = recoverer(node.cells[4].firstChild.innerHTML);
+		G.descArea.value = text;
+		G.editMode = true;
+		G.edittingNode = node;
+		G.descDialog.style = "display: block;";
+		G.descArea.focus();
+
 	} else {
 		G.playStartMark = Number(timeRepToSec(node.cells[1].innerHTML));
 		G.wavePlayer.setTime(G.playStartMark);
 		G.playEndMark =  Number(timeRepToSec(node.cells[3].innerHTML));
 		G.wavePlayer.play();
 	}
+}
+
+function escaper(str) {
+	return str.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\n", "<br>");
+}
+
+function recoverer(str) {
+	return str.replaceAll("<br>", "\n").replaceAll("&gt;", ">").replaceAll("&lt;", "<").replaceAll("&amp;", "&");
 }

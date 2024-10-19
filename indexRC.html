@@ -2,14 +2,21 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>Eurythm ver. 1.20</title>
+		<title>Eurythm ver. 1.21</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="shortcut icon" href="kiwi-bird.png">
 		<link rel="stylesheet" href="./LitePlayerRC.css">
 	</head>
 	<body>
+		<div class="Modal" id="DescDialog">
+			<div class="Modal-content">
+				<textarea id="DescArea" style="width: 100%; height: 20em; resize:none;">
+				</textarea>
+				<input type="button" id="DescOkButton" value="OK"></input>
+			</div>
+		</div>
 		<header>
-			<a href="./docs/help.html" target="_blank">Eurythm</a> ver. 1.20
+			<a href="./docs/help.html" target="_blank">Eurythm</a> ver. 1.21
 		</header>
 		<div style="display: flex; flex-direction: column; width: 100%; height: calc(100vh - 30px);">
 			<div style="padding: 5px;">
@@ -58,6 +65,18 @@
 					</div>
 				</div>
 			</div>
+			<label style="margin: 5px;">Font size:
+			<input list="fontsize" id="FontSize" value="20"/></label>
+			<datalist id="fontsize">
+				<option value="14">
+				<option value="16">
+				<option value="18">
+				<option value="20">
+				<option value="22">
+				<option value="24">
+				<option value="26">
+				<option value="28">
+			</datalist>
 			<div style="flex: 1; overflow-y: auto;">
 				<table id="ABtable">
 				</table>
