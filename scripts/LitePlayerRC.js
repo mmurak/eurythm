@@ -205,6 +205,7 @@ G.inputFile.addEventListener("focus", () => {G.inputFile.blur()});	// this is to
 
 // Play/Pause control
 G.playPause.addEventListener("click", playPauseControl);
+G.playPause.addEventListener("focus", () => {G.playPause.blur(); });
 
 // Reset play speed
 G.defaultSpeed.addEventListener("click", resetPlaySpeed);
