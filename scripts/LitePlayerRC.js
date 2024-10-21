@@ -29,6 +29,7 @@ class TimeMarkerManager {
 			// Play button cell
 			let playCell = newRow.insertCell(0);
 			let playCellA = document.createElement("input");
+			playCellA.style = "vertical-align: text-top;";
 			playCellA.type = "button";
 			playCellA.value = "PLAY";
 			playCellA.addEventListener("click", () => { this.clickCallback("ps", newRow); });
