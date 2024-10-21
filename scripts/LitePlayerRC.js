@@ -36,21 +36,24 @@ class TimeMarkerManager {
 
 			// Start cell
 			let cellZero = newRow.insertCell(1);
+			cellZero.style.color = "blue";
 			let startTime = document.createTextNode(convertTimeRep(elem[0]));
 			cellZero.appendChild(startTime);
 
 			// Dummy cell
 			let cellDummy = newRow.insertCell(2);
+			cellDummy.style.color = "blue";
 			cellDummy.appendChild(document.createTextNode("〜"));
 
 			// Stop cell
 			let cellOne = newRow.insertCell(3);
+			cellOne.style.color = "blue";
 			let endTime = document.createTextNode(convertTimeRep(elem[1]));
 			cellOne.appendChild(endTime);
 
 			// Comment cell
 			let cellTwo = newRow.insertCell(4);
-			cellTwo.style = "width: 100em;";
+			cellTwo.style = "width: 100em; padding: 0 0 0 10px;";
 			let commentText = document.createElement("span");
 			commentText.innerHTML = escaper(elem[2]);
 			cellTwo.appendChild(commentText);
@@ -262,7 +265,13 @@ function processZoomOut(evt) {
 
 G.markA.addEventListener("click", markSectionStart);
 
-G.markB.addEventListener("click", markSectionEnd);
+G.markB.addEventListener("click", (evt) => {
+	if (evt.shiftKey) {
+		markSectionEndWithText();
+	} else {
+		markSectionEndWithoutText();
+	}
+});
 
 G.descOkButton.addEventListener("click", () => { processDescOk(); });
 
@@ -285,8 +294,10 @@ document.addEventListener("keydown", (evt) => {
 		_changePlaySpeed();
 	} else if ((evt.key == "a") || (evt.key == "A")) {
 		markSectionStart();
-	} else if ((evt.key == "b") || (evt.key == "B")) {
-		markSectionEnd();
+	} else if (evt.key == "b") {
+		markSectionEndWithoutText();
+	} else if (evt.key == "B") {
+		markSectionEndWithText();
 	} else if ((evt.key == "d") || (evt.key == "D")) {
 		resetPlaySpeed();
 	} else if ((evt.key == "i") || (evt.key == "I")) {
@@ -295,7 +306,7 @@ document.addEventListener("keydown", (evt) => {
 		processZoomOut(evt);
 	}
 //	evt.stopPropagation();
-//	evt.preventDefault();
+	evt.preventDefault();
 	return false;
 });
 
@@ -346,6 +357,8 @@ function readyCB() {
 	G.speedStorage = 1;
 
 	G.timeMarkerManager.eraseAllData(G.abTable);
+	G.timeMarkerManager.addData(0.0, G.wavePlayer.getDuration(), "");
+	G.timeMarkerManager.buildTable(G.abTable);
 }
 function playCB() {
 	G.fieldEnabler.setEnable([
@@ -411,7 +424,19 @@ function markSectionStart() {
 	G.markA.value = convertTimeRep(G.sectionStart) + " →";
 }
 
-function markSectionEnd() {
+function markSectionEndWithoutText() {
+	const currentTime = G.wavePlayer.getCurrentTime();
+	if (currentTime <= G.sectionStart)  return;
+	G.markA.value = "A";
+	G.sectionEnd = currentTime;
+	G.timeMarkerManager.addData(G.sectionStart, G.sectionEnd, "");
+	G.timeMarkerManager.buildTable(G.abTable);
+	if (G.wavePlayer.isPlaying()) {
+		G.timeMarkerManager.buttonDisabler(G.abTable, true);
+	}
+}
+
+function markSectionEndWithText() {
 	const currentTime = G.wavePlayer.getCurrentTime();
 	if (currentTime <= G.sectionStart)  return;
 	G.markA.value = "A";
