@@ -11,10 +11,6 @@ class TimeMarkerManager {
 	addData(sectionStart, sectionEnd, note) {
 		this.dataPool.push([sectionStart, sectionEnd, note]);
 	}
-	modifyData(sectionStart, sectionEnd, node, note) {
-		let idx = Number(node.id.replace("r", "")) - 1;
-		this.dataPool[idx][2] = note;
-	}
 	deleteData(node) {
 		let idx = Number(node.id.replace("r", "")) - 1;
 		this.dataPool.splice(idx, 1);
@@ -29,7 +25,6 @@ class TimeMarkerManager {
 			// Play button cell
 			let playCell = newRow.insertCell(0);
 			let playCellA = document.createElement("input");
-			playCellA.style = "vertical-align: text-top;";
 			playCellA.type = "button";
 			playCellA.value = "PLAY";
 			playCellA.addEventListener("click", () => { this.clickCallback("ps", newRow); });
@@ -37,37 +32,20 @@ class TimeMarkerManager {
 
 			// Start cell
 			let cellZero = newRow.insertCell(1);
-			cellZero.style.color = "blue";
 			let startTime = document.createTextNode(convertTimeRep(elem[0]));
 			cellZero.appendChild(startTime);
 
 			// Dummy cell
 			let cellDummy = newRow.insertCell(2);
-			cellDummy.style.color = "blue";
 			cellDummy.appendChild(document.createTextNode("〜"));
 
 			// Stop cell
 			let cellOne = newRow.insertCell(3);
-			cellOne.style.color = "blue";
 			let endTime = document.createTextNode(convertTimeRep(elem[1]));
 			cellOne.appendChild(endTime);
 
-			// Comment cell
-			let cellTwo = newRow.insertCell(4);
-			cellTwo.style = "width: 100em; padding: 0 0 0 10px;";
-			let commentText = document.createElement("span");
-			commentText.innerHTML = escaper(elem[2]);
-			cellTwo.appendChild(commentText);
-
-			// Edit button
-			let editButton = newRow.insertCell(5);
-			let editButtonAnchor = document.createElement("a");
-			editButtonAnchor.addEventListener("click", () => { this.clickCallback("edit", newRow); });
-			editButtonAnchor.innerHTML = "✍️";
-			editButton.appendChild(editButtonAnchor);
-
 			// Waste bin 🗑️
-			let cellWaste = newRow.insertCell(6);
+			let cellWaste = newRow.insertCell(4);
 			let cellWasteAnchor = document.createElement("a");
 			cellWasteAnchor.addEventListener("click", () => { this.clickCallback("del", newRow); });
 			cellWasteAnchor.innerHTML = "🗑️";
@@ -107,10 +85,6 @@ class GlobalManager {
 		this.markB = document.getElementById("MarkB");
 		this.abTable = document.getElementById("ABtable");
 
-		this.descOkButton = document.getElementById("DescOkButton");
-		this.descDialog = document.getElementById("DescDialog");
-		this.descArea = document.getElementById("DescArea");
-
 		this.wavePlayer = null;
 
 		this.currentZoomFactor = 10;
@@ -128,11 +102,7 @@ class GlobalManager {
 		this.playStartMark = 0;
 		this.playEndMark = -1;
 
-		this.fontSize = document.getElementById("FontSize");
-
 		this.timeMarkerManager = new TimeMarkerManager(abControl);
-		this.editMode = false;
-		this.edittingNode = null;
 
 		this.fieldEnabler = new FieldEnabler([
 			"InputFile",
@@ -151,8 +121,6 @@ class GlobalManager {
 	}
 }
 const G = new GlobalManager();
-
-G.abTable.style = "font-size:" + G.fontSize.value + "px";
 
 /*
  * waveSurfer section
@@ -209,7 +177,6 @@ G.inputFile.addEventListener("focus", () => {G.inputFile.blur()});	// this is to
 
 // Play/Pause control
 G.playPause.addEventListener("click", playPauseControl);
-G.playPause.addEventListener("focus", () => {G.playPause.blur(); });
 
 // Reset play speed
 G.defaultSpeed.addEventListener("click", resetPlaySpeed);
@@ -266,18 +233,10 @@ function processZoomOut(evt) {
 
 G.markA.addEventListener("click", markSectionStart);
 
-G.markB.addEventListener("click", (evt) => {
-	if (evt.shiftKey) {
-		markSectionEndWithText();
-	} else {
-		markSectionEndWithoutText();
-	}
-});
-
-G.descOkButton.addEventListener("click", () => { processDescOk(); });
+G.markB.addEventListener("click", markSectionEnd);
 
 document.addEventListener("keydown", (evt) => {
-	if ((G.playPause.disabled) || (G.descDialog.style.display == "block"))  return;
+	if (G.playPause.disabled)  return;
 	if (evt.key == " ") {
 		playPauseControl();
 	} else if (evt.key == "ArrowLeft") {
@@ -295,10 +254,8 @@ document.addEventListener("keydown", (evt) => {
 		_changePlaySpeed();
 	} else if ((evt.key == "a") || (evt.key == "A")) {
 		markSectionStart();
-	} else if (evt.key == "b") {
-		markSectionEndWithoutText();
-	} else if (evt.key == "B") {
-		markSectionEndWithText();
+	} else if ((evt.key == "b") || (evt.key == "B")) {
+		markSectionEnd();
 	} else if ((evt.key == "d") || (evt.key == "D")) {
 		resetPlaySpeed();
 	} else if ((evt.key == "i") || (evt.key == "I")) {
@@ -306,7 +263,7 @@ document.addEventListener("keydown", (evt) => {
 	} else if ((evt.key == "o") || (evt.key == "O")) {
 		processZoomOut(evt);
 	}
-//	evt.stopPropagation();
+	evt.stopPropagation();
 	evt.preventDefault();
 	return false;
 });
@@ -314,15 +271,6 @@ document.addEventListener("keydown", (evt) => {
 // Double-click disabler
 document.addEventListener("dblclick", (e) => {
 	e.preventDefault();
-});
-
-G.fontSize.addEventListener("focus", (evt) => {
-	G.fontSize.value = "";
-});
-
-G.fontSize.addEventListener("change", (evt) => {
-	G.abTable.style = "font-size:" + G.fontSize.value + "px";
-	G.fontSize.blur();
 });
 
 
@@ -358,8 +306,6 @@ function readyCB() {
 	G.speedStorage = 1;
 
 	G.timeMarkerManager.eraseAllData(G.abTable);
-	G.timeMarkerManager.addData(0.0, G.wavePlayer.getDuration(), "");
-	G.timeMarkerManager.buildTable(G.abTable);
 }
 function playCB() {
 	G.fieldEnabler.setEnable([
@@ -425,41 +371,16 @@ function markSectionStart() {
 	G.markA.value = convertTimeRep(G.sectionStart) + " →";
 }
 
-function markSectionEndWithoutText() {
+function markSectionEnd() {
 	const currentTime = G.wavePlayer.getCurrentTime();
 	if (currentTime <= G.sectionStart)  return;
 	G.markA.value = "A";
 	G.sectionEnd = currentTime;
-	G.timeMarkerManager.addData(G.sectionStart, G.sectionEnd, "");
+	G.timeMarkerManager.addData(G.sectionStart, G.sectionEnd, "some notes");
 	G.timeMarkerManager.buildTable(G.abTable);
 	if (G.wavePlayer.isPlaying()) {
 		G.timeMarkerManager.buttonDisabler(G.abTable, true);
 	}
-}
-
-function markSectionEndWithText() {
-	const currentTime = G.wavePlayer.getCurrentTime();
-	if (currentTime <= G.sectionStart)  return;
-	G.markA.value = "A";
-	G.sectionEnd = currentTime;
-	G.descArea.value = "";
-	G.editMode = false;
-	G.descDialog.style = "display: block;";
-	G.descArea.focus();
-}
-
-function processDescOk() {
-	if (G.editMode) {
-		G.timeMarkerManager.modifyData(G.sectionStart, G.sectionEnd, G.edittingNode, G.descArea.value);
-	} else {
-		G.timeMarkerManager.addData(G.sectionStart, G.sectionEnd, G.descArea.value);
-	}
-	G.timeMarkerManager.buildTable(G.abTable);
-	if (G.wavePlayer.isPlaying()) {
-		G.timeMarkerManager.buttonDisabler(G.abTable, true);
-	}
-	G.descDialog.style = "display: none;";
-	G.markA.value = "A";
 }
 
 function convertTimeRep(time) {
@@ -485,28 +406,11 @@ function abControl(command, node) {
 	if (command == "del") {
 		G.timeMarkerManager.deleteData(node);
 		G.timeMarkerManager.buildTable(G.abTable);
-	} else if (command == "edit") {
-		G.sectionStart = node.cells[1];
-		G.sectionEnd = node.cells[3];
-		let text = recoverer(node.cells[4].firstChild.innerHTML);
-		G.descArea.value = text;
-		G.editMode = true;
-		G.edittingNode = node;
-		G.descDialog.style = "display: block;";
-		G.descArea.focus();
-
+		
 	} else {
 		G.playStartMark = Number(timeRepToSec(node.cells[1].innerHTML));
 		G.wavePlayer.setTime(G.playStartMark);
 		G.playEndMark =  Number(timeRepToSec(node.cells[3].innerHTML));
 		G.wavePlayer.play();
 	}
-}
-
-function escaper(str) {
-	return str.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\n", "<br>");
-}
-
-function recoverer(str) {
-	return str.replaceAll("<br>", "\n").replaceAll("&gt;", ">").replaceAll("&lt;", "<").replaceAll("&amp;", "&");
 }
